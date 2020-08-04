@@ -1,0 +1,2592 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass extarticle
+\begin_preamble
+\usepackage{preprint/authblk}
+% Added by lyx2lyx
+\renewcommand{\textendash}{--}
+\renewcommand{\textemdash}{---}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 2
+\papersides 1
+\paperpagestyle default
+\bullet 0 0 0 -1
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Direct Calculation of Double Counting Rate for Neutron Multiplicity Methods
+\end_layout
+
+\begin_layout Author
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Wilfried Monange 
+\backslash
+thanks{Institut of Radioprotection and Nuclear Safety} 
+\backslash
+and Grégory Caplin 
+\backslash
+thanks{ORANO at IRSN when the work was prepared} 
+\backslash
+and Olivier Jacquet 
+\backslash
+thanks{Subcontractor}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Neutron density in nuclear system is subject to fluctuations that arise
+ from nuclear random process.
+ For sub-critical systems with large number of neutrons these fluctuations
+ are usually small enough so that the well known Boltzmann equation is valid
+ and the system is correctly described by mean quantities.
+ This is no more true with a law neutron density that implies predominantly
+ neutron fluctuations over average values obliging the use of other techniques
+ to correctly describe the neutron population.
+ Among them, the Neutron Multiplicity Counting (NMC) methods 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "NMC Ensslin,NMC Robba"
+
+\end_inset
+
+ focus on correlated time neutrons (i.e.
+ neutrons belonging to the same fission chain) detections for sub-critical
+ system using mean single count rate (i.e.
+ mean count rate of detection), double count rate (i.e.
+ mean count rate of time correlated pairs of detections), triple count rate
+ (i.e.
+ mean count rate of time correlated triples of detections), etc.
+ In this way NMC is based on higher-order moment of the counting distribution.
+\end_layout
+
+\begin_layout Standard
+Usually NMC values obtained by simulation are calculated with algorithms
+ very similar to those used with real detectors and therefore only make
+ use of detection times.
+ Depending on the simulation tools, the calculation of these values is performed
+ directly inside the simulation code or outside 
+\emph on
+via
+\emph default
+ output files (List-mode like) and post-processing programs.
+ This approach is referred here to as the 
+\emph on
+analog method.
+
+\emph default
+ As this method require exact simulation of the transport of neutrons, i.e.
+ analog calculation, classical Monte Carlo techniques for variance reduction
+ (Russian roulette, splitting etc.), which only preserve first order moment
+ (mean quantities), cannot be used.
+\end_layout
+
+\begin_layout Standard
+As a consequence and although dating back to the early nuclear era, the
+ use and study of NMC techniques has been for many years limited by the
+ performance of computers that struggled to simulate the entire neutron
+ population of an experiment.
+ Thanks to modern computers a number of barriers have been raised and these
+ techniques are now regularly used for the reactivity assessment of low
+ power ADS reactors, non-destructive assay of special nuclear material,
+ sub-critical benchmarks 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Multiplicity benchmark,BErPW Benchmark,BErPNi Benchmark,SCRaP Benchmark"
+
+\end_inset
+
+, etc.
+\end_layout
+
+\begin_layout Standard
+However, NMC simulations can still be very CPU time consuming under certain
+ circumstances such as configurations with huge calculation time for neutron
+ transport or when NMC values with large time scale are required.
+ Some methods have been developped to solve this problem such as variance
+ reduction techniques 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Szieberth"
+
+\end_inset
+
+ or sensitivities estimation throw eigen values calculations 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hutchinson sensitivity"
+
+\end_inset
+
+.
+ This paper proposes another approach based on the use of analog simulation
+ tools taking advantage of an additional information provided by the code
+ : the fission chain identifier (or history identifier) to which a detection
+ belongs.
+ This information makes it possible to identify the correlated detections,
+ i.e.
+ resulting from the same fission chain.
+ This approach will be referred to the 
+\emph on
+direct method.
+ 
+\emph default
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+direct
+\begin_inset Quotes erd
+\end_inset
+
+ refers to the direct identification of correlated detections.
+ This paper focuses on the calculation of the single counting rate, the
+ double counting rate and the so called Feynman-Y curve
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Feynman,Croft"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The first part recalls the 
+\emph on
+analog method
+\emph default
+ methodology, then the theory of the direct method is described and is applied
+ to a real experiment in the last part.
+\end_layout
+
+\begin_layout Section
+Analog method
+\end_layout
+
+\begin_layout Standard
+The calculation of NMC values has been extensively described in the literature
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Uhrig,Hutchinson1"
+
+\end_inset
+
+.
+ This section recall the basis using the Hage-Cifarelli formalism 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Cifarelli"
+
+\end_inset
+
+ in order to keep consisteing with the 
+\emph on
+direct method
+\emph default
+ formalism in the next section.
+ During an NMC simulation, neutron detections are time-tagged and stored
+ into a file creating the so called 
+\emph on
+signal
+\emph default
+ (which therefore contains a set of detection times).
+ In a second step, the post processing divid this 
+\emph on
+signal
+\emph default
+ into equal samples of width 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ For each of them the number of events are counted and binned into a histogram
+ called the Feynman histogram.
+ This histogram therefore represents the occurrence probabilities of various
+ multiplets (i.e., 1 detection, 2 detections, etc.) occurring within a specified
+ samples width 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ Several methods exist to split the signal, Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Feynman_hist"
+
+\end_inset
+
+ shows the construction of the Feynman histogram with consecutive samples.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/feynman_histo.png
+	lyxscale 75
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Feynman_hist"
+
+\end_inset
+
+The post-processing divid a signal into samples (a) and construct the feynman
+ histogram (b).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From these the 
+\begin_inset Formula $c_{k}$
+\end_inset
+
+ values representing the number of times 
+\begin_inset Formula $k$
+\end_inset
+
+ detections are found in samples are deduced.
+ This can be repeated for multiple samples widths resulting in multiple
+ Feynman histograms.
+ The NMC values are finally calculated with the following formulas:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+m_{1}(\tau)=\frac{\underset{k}{\sum}k\,c_{k}(\tau)}{\underset{k}{\sum}c_{k}(\tau)}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+m_{2}(\tau)=\frac{1}{2}\frac{\underset{k}{\sum}k(k-1)c_{k}(\tau)}{\underset{k}{\sum}c_{k}(\tau)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Y_{1}(\tau)=\frac{m_{1}(\tau)}{\tau}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+Y_{2}(\tau)=\frac{1}{\tau}\left(m_{2}(\tau)-\frac{1}{2}m_{1}(\tau)^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+Y(\tau)=2\times\frac{Y_{2}(\tau)}{Y_{1}(\tau)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $Y_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $Y_{2}$
+\end_inset
+
+ stand for the single and double counting rates for samples of width 
+\begin_inset Formula $\tau$
+\end_inset
+
+, 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ being the first two reduced factorial moments as expressed in the Hage-Cifarell
+i formalism.
+ 
+\begin_inset Formula $Y$
+\end_inset
+
+ is the Feynman-Y value also equal to the ratio of the variance to the mean
+ in the number of neutron detections in samples of width 
+\begin_inset Formula $\tau$
+\end_inset
+
+ minus unity : 
+\begin_inset Formula $Y(\tau)=\frac{Var\left(C_{k}(\tau)\right)}{Mean\left(C_{k}(\tau)\right)}-1$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Since 
+\begin_inset Formula $Y_{1}(\tau)$
+\end_inset
+
+ is simply the count rate, his value should remain constant regardless the
+ samples width value (as long as it is sufficiently large to avoid statistical
+ effect) and equal to a named value 
+\begin_inset Formula $R_{1}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Changing 
+\begin_inset Formula $\tau$
+\end_inset
+
+ allows to adjust the amount of detections coming from the same fission
+ chains (i.e.
+ correlated detections) taken into account.
+ If 
+\begin_inset Formula $\tau$
+\end_inset
+
+ tends towards zero the probability of having correlated detections also
+ tends towards zero as well as 
+\begin_inset Formula $Y_{2}(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $\tau$
+\end_inset
+
+ increases, more and more correlated detections are taken into account leading
+ to an increase of 
+\begin_inset Formula $Y_{2}(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+.
+ At first only correlated detections from prompt neutrons are taken into
+ account, then from all neutrons (prompt + delayed).
+ This is shown by the presence of two plateaus on the Feynman curve.
+ Further increase of 
+\begin_inset Formula $\tau$
+\end_inset
+
+ do not add more correlated detection and both 
+\begin_inset Formula $Y_{2}(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ tend to their asymptotic values respectively named 
+\begin_inset Formula $R_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $Y_{\infty}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/feynman_curve.png
+	lyxscale 75
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Feynman-Y curve as a function of the samples width (
+\begin_inset Formula $\tau$
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In order to reduce uncertainties the number of samples used must be large
+ (often several thousand).
+ If one want to cover delayed neutron, large samples are required (at least
+ 100 seconds) and the simulated signal can required unacceptable CPU time
+ or experiment duration.
+ As a consequence, 
+\begin_inset Formula $R_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $Y_{\infty}$
+\end_inset
+
+ are in practice estimated throw formulas depending on 
+\begin_inset Formula $Y_{2}(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+, making these values dependent of both the samples width (i.e.
+ 
+\begin_inset Formula $R_{2}(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y_{\infty}(\tau)$
+\end_inset
+
+) and the underlying theory:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+R_{2}(\tau) & =\frac{1}{\omega(\tau)}\,Y_{2}(\tau)\label{eq:R2_omega}\\
+Y_{\infty}(\tau) & =2\,\frac{R_{2}(\tau)}{R_{1}}\nonumber \\
+\omega\,(\lambda,\tau) & =1-\frac{1-e^{-\lambda\tau}}{\lambda\tau}\nonumber 
+\end{align}
+
+\end_inset
+
+Wehre 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is the inverse of the neutron lifetime which includes slowing-down time
+ in the detector.
+ 
+\end_layout
+
+\begin_layout Standard
+Note that for the NMC values to be meaningful and usable for other measures
+ (calculation of total multiplication for instance), the experiment must
+ be in a steady state, i.e.
+ the power remains constant over time.
+\end_layout
+
+\begin_layout Section
+Direct method
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $S$
+\end_inset
+
+ be the mean rate of source events (i.e.
+ the mean number of histories per time unit) and 
+\begin_inset Formula $p_{N}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+the probability for an history to create 
+\begin_inset Formula $N$
+\end_inset
+
+ detections.
+ Both values comes from simulation results.
+ In particular, the association of each detection with the fission chain
+ identifier makes it possible to calculate the 
+\begin_inset Formula $p_{N}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+quantity.
+ That being said, for a stationary process the mean rate of detections from
+ histories creating 
+\begin_inset Formula $N$
+\end_inset
+
+ detections is 
+\begin_inset Formula $S\cdot p_{N}\cdot C_{N}^{1}$
+\end_inset
+
+ where 
+\begin_inset Formula $C$
+\end_inset
+
+ denotes the binomial coefficient.
+ Summing over all possible numbers of detections gives the single rate of
+ detections:
+\begin_inset Formula 
+\begin{equation}
+\mathring{Y}_{1}=S\sum_{N=1}^{\infty}p_{N}\cdot C_{N}^{1}\label{eq:y1_final}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this formula as well as for the following, the circle denotes values
+ calculated using the 
+\emph on
+direct method
+\emph default
+.
+ One may note that 
+\begin_inset Formula $\mathring{Y}_{1}$
+\end_inset
+
+ does not depend on any samples width values and thus 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+it is equal to its asymptotic value 
+\begin_inset Formula $\mathring{R}_{1}$
+\end_inset
+
+.
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ To be consistent with formulas presented in section 2 the expected number
+ of detections per samples 
+\begin_inset Formula $\mathring{m}_{1}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+is defined as 
+\begin_inset Formula $\mathring{Y}_{1}\,\tau$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The same approach is then applied for the double counting rate.
+ Considering the mean rate of correlated pairs triggered by the 
+\emph on
+ith
+\emph default
+ detection of histories creating 
+\begin_inset Formula $N$
+\end_inset
+
+ detections is 
+\begin_inset Formula $S\cdot p_{N}\cdot C_{N-i}^{1}$
+\end_inset
+
+, the mean double counting rate created by histories having 
+\begin_inset Formula $N$
+\end_inset
+
+ detections is equal to:
+\begin_inset Formula 
+\[
+S\cdot p_{N}\sum_{i=1}^{N-1}C_{N-i}^{1}=S\cdot p_{N}\cdot C_{N}^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Taking into account all histories with any number of detections gives the
+ asymptotic mean double counting rate 
+\begin_inset Formula $\mathring{R}_{2}$
+\end_inset
+
+: 
+\begin_inset Formula 
+\begin{equation}
+\mathring{R}_{2}=S\sum_{N=2}^{\infty}p_{N}\cdot C_{N}^{2}\label{eq:r2_final}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Contrary to the 
+\emph on
+analog method,
+\emph default
+ the 
+\emph on
+direct method 
+\emph default
+gives directly access to the asymptotic double counting rate without the
+ need of intermediate formulas.
+ As a consequence, 
+\begin_inset Formula $\mathring{R}_{2}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+do not depends of neither 
+\begin_inset Formula $\tau$
+\end_inset
+
+ or an underlying theory but only on the number of simulated histories.
+\end_layout
+
+\begin_layout Standard
+We are now interested in the calculation of the non-asymptotic value of
+ 
+\begin_inset Formula $\mathring{R}_{2}$
+\end_inset
+
+, i.e.
+ 
+\begin_inset Formula $\mathring{Y}_{2}(\tau)$
+\end_inset
+
+.
+ Let's consider a first detection in the time range 
+\begin_inset Formula $\left[t_{1},t_{1}+dt_{1}\right]$
+\end_inset
+
+ and a second one inside 
+\begin_inset Formula $\left[t_{2},t_{2}+dt_{2}\right]$
+\end_inset
+
+ with 
+\begin_inset Formula $t_{1}<t_{2}$
+\end_inset
+
+, the average number of correlated pairs of detections 
+\begin_inset Formula $Q_{r}$
+\end_inset
+
+ between two correlated detections distant of 
+\begin_inset Formula $t_{2}-t_{1}$
+\end_inset
+
+ is: 
+\begin_inset Formula 
+\[
+Q_{r}(t_{2}-t_{1})\,dt_{1}\cdot dt_{2}=\mathring{R}_{2}\cdot pdf(t_{2}-t_{1})\,dt_{1}\cdot dt_{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With 
+\begin_inset Formula $pdf$
+\end_inset
+
+ the probability density function of the time intervals between any pair
+ of detections of an history i.e.
+ the auto-correlation function.
+ Once again the fission chain identifier provided by the simulation code
+ allows the direct calculation of the PDF.
+ The average counts in the time ranges 
+\begin_inset Formula $\left[t_{1},t_{1}+dt_{1}\right]$
+\end_inset
+
+ and 
+\begin_inset Formula $\left[t_{2},t_{2}+dt_{2}\right]$
+\end_inset
+
+ that are uncorrelated pairs of detections is equal to the product of the
+ average detection rate: 
+\begin_inset Formula 
+\[
+Q_{a}(t_{2}-t_{1})\,dt_{1}\cdot dt_{2}=\mathring{R}_{1}{}^{2}\,dt_{1}\cdot dt_{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Summing 
+\begin_inset Formula $Q_{r}$
+\end_inset
+
+ and 
+\begin_inset Formula $Q_{a}$
+\end_inset
+
+ gives the well-known Rossi-Alpha distribution 
+\begin_inset Formula $Q$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{aligned}Q(t_{2}-t_{1})dt_{1}\cdot dt_{2} & =\left(Q_{a}(t_{2}-t_{1})+Q_{r}(t_{2}-t_{1})\right)dt_{1}\cdot dt_{2}\\
+ & =\left(\mathring{R}_{1}^{\,\,2}+\mathring{R}_{2}\cdot pdf(t_{2}-t_{1})\right)dt_{1}\cdot dt_{2}
+\end{aligned}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where the subscript 
+\begin_inset Formula $a$
+\end_inset
+
+ and 
+\begin_inset Formula $r$
+\end_inset
+
+ refer to the words 
+\begin_inset Quotes eld
+\end_inset
+
+accidental
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+real
+\begin_inset Quotes erd
+\end_inset
+
+ as often used with the Rossi-Alpha method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "NMC Ensslin"
+
+\end_inset
+
+.
+ With 
+\begin_inset Formula $Q_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $Q_{r}$
+\end_inset
+
+ defined, one can now calculate 
+\begin_inset Formula $\mathring{m}_{2a}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathring{m}_{2r}$
+\end_inset
+
+ which respectively correspond to the expected number of uncorrelated or
+ correlated pairs of detection in samples of width 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ This is achieved by summing for each detection occurring at 
+\begin_inset Formula $t_{1}\leqslant\tau$
+\end_inset
+
+ the second detections occurring at 
+\begin_inset Formula $t_{2}\leqslant\tau$
+\end_inset
+
+ :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\begin{aligned}\mathring{m}_{2r}(\tau) & =\int_{0}^{\tau}dt_{1}\cdot\int_{t_{1}}^{\tau}Q_{r}(t_{2}-t_{1})\cdot dt_{2}\\
+ & =\mathring{R}_{2}\int_{0}^{\tau}cdf(t)\cdot dt
+\end{aligned}
+\label{eq:m2r}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{aligned}\mathring{m}_{2a}(\tau) & =\int_{0}^{\tau}dt_{1}\cdot\int_{t_{1}}^{\tau}Q_{a}(t_{2}-t_{1})\cdot dt_{2}\\
+ & =\frac{1}{2}\mathring{R}_{1}^{\,\,2}\,\tau^{2}
+\end{aligned}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With 
+\begin_inset Formula $cdf$
+\end_inset
+
+ the cumulative density function of the time intervals between any pair
+ of detections of an history.
+ Combination of the previous equations gives the final expression of the
+ doubles counting rate as calculated with the 
+\emph on
+direct method 
+\emph default
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\begin{aligned}\mathring{Y}_{2}(\tau) & =\frac{\mathring{m}_{2r}(\tau)}{\tau}\\
+ & =\frac{\mathring{R}_{2}}{\tau}\,\intop_{0}^{\tau}dt\cdot cdf(t)
+\end{aligned}
+\label{eq:y2_final}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the definition of the Feynman-Y values as two times the ratio
+ between the double and simple counting rate remains valid so that no specific
+ derivation is required:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathring{Y}=2\,\frac{\mathring{R}_{2}}{\mathring{R}_{1}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mathring{Y_{\infty}}(\tau)=2\,\frac{Y_{2}(\tau)}{Y_{1}}\label{eq:y_final}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Back to Eq.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:m2r"
+
+\end_inset
+
+, 
+\begin_inset Formula $\int_{0}^{\tau}cdf(t)\cdot dt$
+\end_inset
+
+ behaves asymptotically like 
+\begin_inset Formula $\tau$
+\end_inset
+
+ since 
+\begin_inset Formula $cdf(\tau)$
+\end_inset
+
+ approaches unity.
+ Let us now define a function 
+\begin_inset Formula $w(\tau)$
+\end_inset
+
+ that approaches unity as 
+\begin_inset Formula $\tau$
+\end_inset
+
+ tends towards infinity, and 
+\begin_inset Formula $m_{2}(\tau)$
+\end_inset
+
+ the number of pairs of detections in a gate of width 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ As 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ contains both correlated and uncorrelated pairs of detections, 
+\begin_inset Formula $m_{2r}(\tau)$
+\end_inset
+
+, can also be written as the following :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{aligned}m_{2r}(\tau) & =m_{2}(\tau)-m_{2a}(\tau)\\
+ & =m_{2}(\tau)-\frac{1}{2}m_{1}^{\,\,2}
+\end{aligned}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is now possible to express the asymptotic doubles counting rate
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\mathring{R}_{2}(\tau)$
+\end_inset
+
+ as a function of 
+\begin_inset Formula $w(\tau)$
+\end_inset
+
+.
+ The deduced equation is similar to the one obtained in Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:R2_omega"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathring{R}_{2}(\tau)=\frac{\mathring{Y}_{2}(\tau)}{w(\tau)}=\frac{m_{2}(\tau)-\frac{1}{2}m_{1}^{2}}{\tau\cdot w(\tau)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above reasoning does not differentiate between sources.
+ For instance, if histories are created by both spontaneous fissions and
+ 
+\begin_inset Formula $\left(\alpha-n\right)$
+\end_inset
+
+ reactions, 
+\begin_inset Formula $S$
+\end_inset
+
+ combines these two types of sources.
+ However, for practical reasons it is sometimes interesting to differentiate
+ sources in simulations: one may perform a set of simulations with only
+ spontaneous fission sources and another set of simulations with only 
+\begin_inset Formula $\left(\alpha-n\right)$
+\end_inset
+
+ sources in order to later adjust the proportion of one source type to the
+ other.
+ Since each of these sources creates histories which are independent from
+ each other, Equations 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:y1_final"
+
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:y2_final"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:r2_final"
+
+\end_inset
+
+ can be easily rewritten with source differentiation by considering that
+ the total contribution is the sum of each individual contribution:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathring{R}_{1}=\mathring{Y}_{1}=\sum_{i}^{I}\left[S_{i}\sum_{N=1}^{\infty}p_{i,N}\cdot C_{N}^{1}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathring{R}_{2}=\sum_{i}^{I}\left[S_{i}\sum_{N=2}^{\infty}p_{i,N}\cdot C_{N}^{2}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathring{Y}_{2}(\tau)=\frac{\mathring{R}_{2,i}}{\tau}\,\intop_{0}^{\tau}dt\cdot cdf_{i}(t)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With the subscript 
+\begin_inset Formula $i$
+\end_inset
+
+ denoting the contribution of the source of type 
+\begin_inset Formula $i$
+\end_inset
+
+ among 
+\begin_inset Formula $I$
+\end_inset
+
+ sources.
+ 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+ is still calculated through two times the ratio of 
+\begin_inset Formula $\mathring{Y}_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathring{Y}_{1}$
+\end_inset
+
+ and no specific derivation is required.
+\end_layout
+
+\begin_layout Section
+Results and discussion
+\end_layout
+
+\begin_layout Subsection
+Case study
+\end_layout
+
+\begin_layout Standard
+The case study is the Sub-critical Copper-Reflected 
+\begin_inset Formula $\alpha$
+\end_inset
+
+-phase Plutonium (SCR
+\begin_inset Formula $\alpha$
+\end_inset
+
+P) integral benchmark experiment designed and measured by the Los Alamos
+ National Laboratory at the National Criticality Experiments Research Center
+ (NCERC).
+ The experiment is detailed in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "SCRaP Benchmark"
+
+\end_inset
+
+ and presented in Figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:BeRP-ball-and"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Experimental-set-up."
+
+\end_inset
+
+.
+ It consists in a weapon-grade plutonium sphere nested in various thicknesses
+ of copper spherical shells and/or polyethylene spherical shells.
+ Neutrons basically arise from spontaneous fissions and 
+\begin_inset Formula $\left(\alpha-n\right)$
+\end_inset
+
+ reactions.
+ The correlated neutron measurement were performed using a detector system
+ made of 
+\begin_inset Formula $He^{3}$
+\end_inset
+
+ tubes inside high density polyethylene.
+ Among the 16 different measured configurations, this paper will focus on
+ configuration number 15 which has the highest 
+\begin_inset Formula $k_{eff}$
+\end_inset
+
+ value.
+ It consists of the plutonium sphere surrounded by a first layer of polyethylene
+ surrounded by 7 layers of copper.
+ Choosing the configuration with the highest reactivity will make easier
+ to distinguish the neutrons delayed part of 
+\begin_inset Formula $Y_{2}(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+.
+ The calculated 
+\begin_inset Formula $k_{eff}$
+\end_inset
+
+ of this configuration with the Monte Carlo code MORET 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MORET"
+
+\end_inset
+
+ developed at IRSN is about 0.944 (
+\begin_inset Formula $\sigma$
+\end_inset
+
+ = 100 pcm).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/scrap1.png
+	lyxscale 40
+	width 6cm
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:BeRP-ball-and"
+
+\end_inset
+
+SCR
+\begin_inset Formula $\alpha$
+\end_inset
+
+P configuration n°15 during assembly.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/scrap2.png
+	lyxscale 40
+	width 6cm
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Experimental-set-up."
+
+\end_inset
+
+Experimental set up.
+ The nuclear system is surrounded by the NOMAD detectors.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+General procedure for the calculation of NMC values
+\end_layout
+
+\begin_layout Standard
+The general procedure used in this paper for the calculation of NMC values
+ with the 
+\emph on
+analog method
+\emph default
+ is as follow:
+\end_layout
+
+\begin_layout Description
+Step 1: A simulation is performed considering both types of neutron sources
+ (spontaneous fissions and 
+\begin_inset Formula $\left(\alpha-n\right)$
+\end_inset
+
+ reactions) and imposing that all histories start (i.e.
+ the instant of the source event) at t = 0 second.
+ The number of source events to be simulated must be sufficient for the
+ duration of the desired signal.
+ For each neutron detection in the two NOMAD detectors, the following informatio
+n is recorded: 
+\end_layout
+
+\begin_layout Itemize
+the type of source from which the neutron originated,
+\end_layout
+
+\begin_layout Itemize
+the detection time,
+\end_layout
+
+\begin_layout Itemize
+the history identifier.
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+The calculation has been performed using the version 6 of MORET - based
+ on MORET
+\begin_inset space \thinspace{}
+\end_inset
+
+5 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MORET"
+
+\end_inset
+
+ - which allows the analog simulation of neutrons and the record of simulation
+ information into list-mode like files.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Step 2: From the output file is extracted for each type of source a number
+ of histories corresponding to the desired signal duration and the intensity
+ of each source.
+\end_layout
+
+\begin_layout Description
+Step 3: The beginning of each histories (and therefore the corresponding
+ detection times) are modified by sampling from a uniform random law over
+ the choosen signal duration interval.
+ Some histories may start close enough to the end of the signal so that
+ their detection times can appear beyond the chosen signal duration.
+ To solve this, the modulo function of parameter the signal duration is
+ applied on each detection time to confine the detection times to the desired
+ time interval.
+ 
+\end_layout
+
+\begin_layout Description
+Step 4: All detection times are merged to form the final signal.
+ 
+\end_layout
+
+\begin_layout Description
+Step 5: Other post-processing can be applied to simulate experimental instrument
+ation behavior such as the detectors dead-time or the detectors time resolution.
+ For this present work no experimental instrumentation effect is taken into
+ account since the 
+\emph on
+direct method 
+\emph default
+cannot handle them for the time beeing and this step is skipped.
+\end_layout
+
+\begin_layout Description
+Step 6: NMC values are calculated using post processing programs as for
+ a signal originating from real detectors.
+\end_layout
+
+\begin_layout Standard
+There is several benefits to this approach for the 
+\emph on
+analog method
+\emph default
+.
+ First, the simulation of the transport of one history is an independent
+ process from the transport of other histories.
+ Therefore, this approach does not necessarily require a parallelized computatio
+n code and it is sufficient to run several instances of the computation
+ code, taking care to modify the seed of the random generator.
+ Secondly, it is possible to adjust the parameters used in post-processing
+ (sources intensities, sources types, signal duration) to build a new signal
+ without having to recalculate the transport part whose calculation time
+ is much longer than that of the post-processing part.
+ Another interesting point is the possibility to change the seed used to
+ sample the beginning time of the histories (step 3).
+ One can then create multiple signals that all contain the same knowledge
+ (i.e.
+ fission chains, detections, etc.) but distributed differently (although
+ the uniform random law is still used).
+ This allows the study of statistical properties (expected mean and standard
+ deviation) of observable calculated from these signals.
+
+\color blue
+ 
+\end_layout
+
+\begin_layout Standard
+Regarding the 
+\emph on
+direct method
+\emph default
+ the post processing program only needs the result of the first step for
+ the calculation of the two required terms 
+\begin_inset Formula $p_{N}$
+\end_inset
+
+ and 
+\begin_inset Formula $pdf(t)$
+\end_inset
+
+.
+ Since each recorded detection has been associated to its corresponding
+ history identifier the calculation of 
+\begin_inset Formula $p_{N}$
+\end_inset
+
+ is straightforward.
+ The calculation of 
+\begin_inset Formula $pdf(t)$
+\end_inset
+
+, must be done taking into account all the combination of detections originating
+ from a history as illustrated in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:any_pair_of_detection"
+
+\end_inset
+
+.
+ It is important that the binning used to calculate 
+\begin_inset Formula $pdf(t)$
+\end_inset
+
+ is fine and cover a large time range in order to include both prompt and
+ delayed neutrons.
+ In the following comparison the binning is composed of 
+\begin_inset Formula $1000$
+\end_inset
+
+ values logarithmicaly distributed between 
+\begin_inset Formula $1\cdot10^{-9}$
+\end_inset
+
+ and 
+\begin_inset Formula $1\cdot10^{4}$
+\end_inset
+
+ seconds.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/any pair of detection.svg.png
+	lyxscale 75
+	width 5cm
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:any_pair_of_detection"
+
+\end_inset
+
+All the combination of detections originating from a history must be taken
+ into account for the calculation of 
+\begin_inset Formula $cdf(\tau)$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As seen from Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:y_final"
+
+\end_inset
+
+, 
+\begin_inset Formula $Y_{1}(\tau)$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{2}(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ are link to each other, moreover as no discrepancy is expected for the
+ single counting rate, this paper focus only on the comparisons between
+ 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Mean values comparison
+\end_layout
+
+\begin_layout Standard
+According to the SCR
+\begin_inset Formula $\alpha$
+\end_inset
+
+P benchmark report 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "SCRaP Benchmark"
+
+\end_inset
+
+ neutrons arise from approximately 128500 spontaneous fissions per second
+ and 4200 
+\begin_inset Formula $\left(\alpha-n\right)$
+\end_inset
+
+ reactions per second.
+ The duration of the simulated signal is about 5500 seconds which approximately
+ represents 
+\begin_inset Formula $7\cdot10^{8}$
+\end_inset
+
+ spontaneous fissions and 
+\begin_inset Formula $2.3\cdot10^{7}$
+\end_inset
+
+
+\begin_inset Formula $\left(\alpha-n\right)$
+\end_inset
+
+ reactions.
+ A first comparison is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Y-values"
+
+\end_inset
+
+ for samples widths from 
+\begin_inset Formula $1\cdot10^{-7}$
+\end_inset
+
+ to 
+\begin_inset Formula $1\cdot10^{4}$
+\end_inset
+
+ seconds between the 
+\emph on
+direct method
+\emph default
+ (i.e.
+ 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+) in red and the 
+\emph on
+analog method
+\emph default
+ (i.e.
+ 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+) in blue.
+ For samples width smaller than 
+\begin_inset Formula $1\cdot10^{-2}$
+\end_inset
+
+
+\begin_inset space \thinspace{}
+\end_inset
+
+seconds both methods are in good agreement.
+ Above this samples width the 
+\emph on
+analog method
+\emph default
+ starts to exhibit large fluctuations (due to an insufficient number of
+ samples used to calculate the NMC values) that makes the comparison infeasible.
+ Futures analyses focus on samples widths greater than 
+\begin_inset Formula $1\cdot10^{-2}$
+\end_inset
+
+
+\begin_inset space \thinspace{}
+\end_inset
+
+seconds.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/plot0.png
+	lyxscale 25
+	width 7cm
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Y-values"
+
+\end_inset
+
+Comparison of 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+ for samples widths between
+\begin_inset space \thinspace{}
+\end_inset
+
+ 
+\begin_inset Formula $1\cdot10^{-7}$
+\end_inset
+
+
+\begin_inset space \thinspace{}
+\end_inset
+
+and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $1\cdot10^{4}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+seconds.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A possible way to make the comparison feasible for larger samples widths
+ is to lengthen the simulated signal duration by performing additional simulatio
+ns.
+ This methodology is in practice inaccessible for desktop computers due
+ to the high CPU time consuming (we are speaking of orders of magnitude
+ longer simulation duration).
+ Another approach is to create a number of independent signals by changing
+ the seed as explained before.
+ The results of this method is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Comp_100_signals"
+
+\end_inset
+
+ for a set of 100 independent generated signals looking at the mean (blue
+ curve) and the standard deviation (black curve) of 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ values.
+ From this figure it can be inferred that the averaged 
+\emph on
+analog
+\emph default
+ 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ values are consistent with the 
+\emph on
+direct method
+\emph default
+ up to samples width of 
+\begin_inset Formula $10$
+\end_inset
+
+ seconds.
+ This figure also shows a very good agreement between the standard deviation
+ based on Reference [10] (black cross points) and based on the set of generated
+ signals.
+ Once again lets recall that all these signals contains the same 
+\begin_inset Quotes eld
+\end_inset
+
+amount of knowledge
+\begin_inset Quotes erd
+\end_inset
+
+ (i.e.
+ sames histories, detections, etc.).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/plot1.png
+	lyxscale 25
+	width 7cm
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Comp_100_signals"
+
+\end_inset
+
+Comparison of 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+ and averaged 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ values over 100 generated signals.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To go further in the comparison, one may generate additional simulated signals.
+ As presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Comp_1000_signals"
+
+\end_inset
+
+, the use of 1000 generated signals (green curve) do not show any significant
+ improvement compare to the use of 100 generated signals.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/plot2.png
+	lyxscale 25
+	width 7cm
+	height 7cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Comp_1000_signals"
+
+\end_inset
+
+Comparison of 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+ and averaged 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ values over 100 generated signals.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Although the previous figures tend to show consistency between the two methods,
+ the delayed neutron part of the Feynman curve could not be compared.
+ To access this portion another approach must be used.
+ By reducing the intensity of the neutron sources it is possible to artificially
+ lengthen the signal duration for the same number of simulated histories.
+ It should be noted that this method does not require additional simulation
+ (neutron transport), as the signal broadening is performed with post-processing
+ functions.
+ In this way, a new set of 100 signals have been generated with a duration
+ equal to 
+\begin_inset Formula $5.5\cdot10^{6}$
+\end_inset
+
+ seconds (about 64 days) corresponding to a source composed of 128.5 SF per
+ second and about 4.2 
+\begin_inset Formula $\left(\alpha-n\right)$
+\end_inset
+
+ reactions per second.
+ Results presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Comp_long"
+
+\end_inset
+
+ for samples widths from 
+\begin_inset Formula $1\cdot10^{-2}$
+\end_inset
+
+ to 
+\begin_inset Formula $1\cdot10^{4}$
+\end_inset
+
+ seconds between the direct method (red curve) and the averaged 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ values (blue curve) show a good agreement over all the inspected ranges.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/plot4.png
+	lyxscale 25
+	width 7cm
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Comp_long"
+
+\end_inset
+
+Comparison of 
+\begin_inset Formula $Y(\tau)$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+ based on an extended signal.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Variance comparison
+\end_layout
+
+\begin_layout Standard
+For the time being, exact formula of the variance of 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+ has not been yet established and estimation of this value is relying on
+ multiple sets of histories.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Y_var_cmp"
+
+\end_inset
+
+ shows the variance as a function of the sets size expressed as the proportion
+ of histories used to calculate 
+\begin_inset Formula $Y$
+\end_inset
+
+ from the previous plots (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Y-values"
+
+\end_inset
+
+ to 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Comp_1000_signals"
+
+\end_inset
+
+).
+ The samples width is equal to 
+\begin_inset Formula $1\,s$
+\end_inset
+
+ and each variance value is calculated with 50 sets of histories.
+ The blue line is a fit demonstrating that the variance varies as the inverse
+ of the number of simulated histories.
+ This is in contrast with the 
+\emph on
+analog method
+\emph default
+ whose the variance varies with the inverse of the number of samples.
+ This figure also includes the uncertainty of 
+\begin_inset Formula $Y(\tau\,=\,1\thinspace s)$
+\end_inset
+
+ from Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Comp_100_signals"
+
+\end_inset
+
+ as a red dashed line (with nominal sources intensities and with all the
+ available histories).
+\end_layout
+
+\begin_layout Standard
+Taking into account that the variance of 
+\begin_inset Formula $Y(\tau=1\thinspace s)$
+\end_inset
+
+ for the SCR
+\begin_inset Formula $\alpha$
+\end_inset
+
+P experiment (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Comp_100_signals"
+
+\end_inset
+
+) is about 0.8, this figure shows that the direct method has about the same
+ variance as the analog method using about 0.1% of the total simulated histories.
+ It has to be noted that this gain depends on many parameters which are
+ not presented here due to the lack of theoretical formula of the direct
+ method's variance.
+ Nevertheless it is obvious that this gain increase with the intensity of
+ the signal since the fission chains tends to overlap more and more.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/plot6.png
+	lyxscale 25
+	width 7cm
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Y_var_cmp"
+
+\end_inset
+
+Variance of 
+\begin_inset Formula $\mathring{Y}(\tau)$
+\end_inset
+
+ as a function of the proportion of histories used.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusion and future work
+\end_layout
+
+\begin_layout Standard
+Traditionally, NMC values are calculated using similar tools to exploit
+ the detections obtained by the experiment's detectors or by simulation.
+ However, in some cases this approach can be very CPU intensive.
+ The 
+\emph on
+direct method
+\emph default
+ uses additional information provided by the simulations to significantly
+ reduce uncertainties and thus simulation times.
+ However, as the present situation stands, this method cannot completely
+ replace the traditional method.
+ The main identified limitations are the following:
+\end_layout
+
+\begin_layout Itemize
+requirement of sub-critical system in a steady state (i.e.
+ constant power with time);
+\end_layout
+
+\begin_layout Itemize
+detector dead time not take into account;
+\end_layout
+
+\begin_layout Itemize
+higher order of counting rates (triple, etc.) are not yet derive.
+ 
+\end_layout
+
+\begin_layout Standard
+Concerning the last point, it should be noted that these values are often
+ difficult to obtain by simulation due to the need of a high detection efficienc
+y to keep the variance reasonable.
+ Therefore the development of the calculation of this value with the 
+\emph on
+direct method
+\emph default
+ could be very advantageous for applications that use these types of measures.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "NMC Ensslin"
+
+\end_inset
+
+N.
+ Ensslin, W.
+ Harker, M.
+ Krick, D.
+ Langner, M.
+ Pickvell: Application guide to neutron multiplicity counting, Los-Alamos
+ manual, LA-13422-M (1998)
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "NMC Robba"
+
+\end_inset
+
+A.A.
+ Robba, E.J.
+ Dowdy and H.F.
+ Atwater, "Neutron Multiplication Measurements Using Moments of the Neutron
+ Counting Distribution", Nuclear Instruments and Methods 215 (1983) 473-479
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Multiplicity benchmark"
+
+\end_inset
+
+J.
+ Arthur, et.
+ al.
+ "Validating the performance of correlated fission multiplicity implementation
+ in radiation transport codes with subcritictal neutron multiplication benchmark
+ experiments", Annals of Nuclear Energy 120 (2018) 348-366
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "BErPW Benchmark"
+
+\end_inset
+
+Richard, B., Hutchinson, J., 2016.
+ Tungsten-reflected plutonium-metal-sphere subcritical measurements.
+ In: International Handbook of Evaluated Criticality Safety Benchmark Experiment
+s, NEA/NSC/DOC/(95)03/I, FUND-NCERC-PU-HE3-MULT-002.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "BErPNi Benchmark"
+
+\end_inset
+
+Richard, B., et al., 2016.
+ Nickel-reflected plutonium-metal-sphere subcritical measurements.
+ In: International Handbook of Evaluated Criticality Safety Benchmark Experiment
+s, NEA/NSC/DOC/(95)03/I, FUND-NCERC-PU-HE3-MULT-001.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Szieberth"
+
+\end_inset
+
+M.
+ Szieberth, J.L.
+ Kloosterman, 
+\begin_inset Quotes eld
+\end_inset
+
+New Methods for the Monte Carlo Simulation of Neutron Noise Experiments
+ in ADS
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Hutchinson sensitivity"
+
+\end_inset
+
+J.
+ Hutchinson, T.
+ Cutler, 
+\begin_inset Quotes eld
+\end_inset
+
+Use of Criticality Eigenvalue Simulations for Subcritical Benchmark Evaluations
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Feynman"
+
+\end_inset
+
+R.
+ P.
+ Feynman, et.
+ al., 
+\begin_inset Quotes eld
+\end_inset
+
+Dispersion of the Neutron Emission in U-235 Fission
+\begin_inset Quotes erd
+\end_inset
+
+, J.
+ Nuclear Energy, 1956, Vol.
+ 3, pp.
+ 64 to 69.
+ Pergamon Press Ltd., London
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Croft"
+
+\end_inset
+
+S.
+ Croft et al., « Feynman variance-to-mean in the context of passive neutron
+ coincidence counting », Nuclear Instruments and Methods In Physics Research
+ Section A: Accelerators, Spectrometers, Detectors and Associated Equipment,
+ Volume 686, 11 September 2012, Pages 136-144.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Uhrig"
+
+\end_inset
+
+R.
+ Uhrig, 
+\begin_inset Quotes eld
+\end_inset
+
+Random Noise Techniques in Nuclear Reactor Systems
+\begin_inset Quotes erd
+\end_inset
+
+, John Wiley & Sons Inc, 1970
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Hutchinson1"
+
+\end_inset
+
+J.
+ Hutchinson, et.
+ al., 
+\begin_inset Quotes eld
+\end_inset
+
+Subcritical Multiplication experiments & Simulations: Overview and Recent
+ Advances,
+\begin_inset Quotes erd
+\end_inset
+
+ ANS Advances in Nonproliferation Technology and Policy Conference, Santa
+ Fe NM, September 2016.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Cifarelli"
+
+\end_inset
+
+D.Cifarelli, W.
+ Hage, “Models for a Three-Parameter Analysis of Neutron Signal Correlation
+ Measurements for Fissile Material Assay,” Nuc.
+ Instr.
+ Meth.
+ A251, 550-563, 1986.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "SCRaP Benchmark"
+
+\end_inset
+
+J.
+ Hutchinson, et.
+ al., 
+\begin_inset Quotes erd
+\end_inset
+
+Subcritical Copper-Reflected a-phase Plutonium (SCRaP) Measurements and
+ Simulations
+\begin_inset Quotes erd
+\end_inset
+
+ In: International Conference on Mathematics and Computational Methods Applied
+ to Nuclear Science and Engineering, LA-UR-17-20621.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "MORET"
+
+\end_inset
+
+B.
+ Cochet, et.
+ al.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Capabilities overview of the MORET 5 Monte Carlo code
+\begin_inset Quotes erd
+\end_inset
+
+, Joint International Conference on Supercomputing in Nuclear Applications
+ and Monte Carlo 2013 (SNA + MC 2013), La Cité des Sciences et de l'Industrie,
+ Paris, France, October 27-31, 2013.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Uncertainties on Y"
+
+\end_inset
+
+Smith-Nelson, et.
+ al.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Uncertainties of the Yn Parameters of the Hage-Cifarelli Formalism
+\begin_inset Quotes erd
+\end_inset
+
+, Los Alamos Report LA-UR-15-21365, 2015.
+\end_layout
+
+\end_body
+\end_document
