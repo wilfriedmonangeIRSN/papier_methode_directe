@@ -1,0 +1,1 @@
+Papier sur la méthode directe.
