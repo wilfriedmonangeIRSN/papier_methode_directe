@@ -1910,7 +1910,7 @@ reference "fig:Comp_100_signals"
 \end_inset
 
  for a set of 100 independent generated signals looking at the mean (blue
- curve) and the standard deviation (curve named (a)) of 
+ curve) and the standard deviation (black curve) of 
 \begin_inset Formula $Y(\tau)$
 \end_inset
 
@@ -1933,8 +1933,8 @@ direct method
 
  seconds.
  This figure also shows a very good agreement between the standard deviation
- based on Reference [10] (curve named (b)) and based on the set of generated
- signals (curve named (a)).
+ based on Reference [10] (black cross points) and based on the set of generated
+ signals.
  Once again lets recall that all these signals contains the same 
 \begin_inset Quotes eld
 \end_inset
@@ -1980,8 +1980,7 @@ Comparison over 100 generated signals of
 \end_inset
 
  values.
- A comprison between two methods for standard deviation estimation is also
- presented.
+ 
 \end_layout
 
 \end_inset
